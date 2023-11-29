@@ -153,9 +153,15 @@ def Settings( **kwargs ):
     # in the corresponding source file.
     filename = FindCorrespondingSourceFile( kwargs[ 'filename' ] )
 
+    compile_flags = cpp_flags
+    if filename.endswith('.cu'):
+        compile_flags = cuda_flags
+        compile_flags.extend(cuda_includes)
+    compile_flags.extend(flags)
+
     if not database:
       return {
-        'flags': flags,
+        'flags': compile_flags,
         'include_paths_relative_to_dir': DIR_OF_THIS_SCRIPT,
         'override_filename': filename
       }
