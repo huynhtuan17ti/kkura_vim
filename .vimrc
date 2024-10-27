@@ -12,6 +12,8 @@ Plugin 'VundleVim/Vundle.vim'
 
 " The following are examples of different formats supported.
 " Keep Plugin commands between vundle#begin/end.
+Plugin 'vim-airline/vim-airline' " Status bar
+Plugin 'vim-airline/vim-airline-themes'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
@@ -21,9 +23,15 @@ Plugin 'ryanoasis/vim-devicons'
 Plugin 'sheerun/vim-polyglot'
 Plugin 'preservim/nerdcommenter'
 Plugin 'instant-markdown/vim-instant-markdown'
-Plugin 'preservim/nerdtree'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
+"Plugin 'preservim/nerdtree'
+"Plugin 'Xuyuanp/nerdtree-git-plugin'
+"Plugin 'jistr/vim-nerdtree-tabs' " NERDTree tabs manager
+"Plugin 'lambdalisue/fern.vim'
+Plugin 'mhinz/vim-grepper' " Search word in project
+Plugin 'xolox/vim-misc'
+Plugin 'xolox/vim-session'
 Plugin 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
+Plugin 'octol/vim-cpp-enhanced-highlight'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -42,18 +50,18 @@ filetype plugin indent on    " required
 
 " ---- YCM ----
 let g:ycm_global_ycm_extra_conf = "~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py"
-" let g:ycm_use_clangd = 0
+let g:ycm_use_clangd = 1
 " Use installed clangd, not YCM-bundled clangd which doesn't get updates.
-let g:ycm_clangd_binary_path = exepath("clangd")
+let g:ycm_clangd_binary_path = exepath("clangd-17")
 " diable error checking
-" let g:ycm_show_diagnostics_ui = 0 
+"let g:ycm_show_diagnostics_ui = 1 
 let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_add_preview_to_completeopt = 1
 " enable :lnext and :lprevious (jump to next/previous error)
 let g:ycm_always_populate_location_list = 1
 " Disable signature help
-let g:ycm_disable_signature_help = 1
+" let g:ycm_disable_signature_help = 1
 let g:ycm_auto_hover = ''
 " Show error details
 let g:ycm_show_detailed_diag_in_popup=1
@@ -71,13 +79,70 @@ let g:ycm_error_symbol = 'E'
 let g:ycm_warning_symbol = 'W'
 " Let clangd fully control code completion
 let g:ycm_clangd_uses_ycmd_caching = 0
-" let g:ycm_clangd_args = ['-pretty', '--header-insertion=never', '--compile-commands-dir=/', '--query-driver=**']
+let g:ycm_clangd_args = ['-pretty', '--query-driver=**']
 " highlight YcmErrorLine guibg=#3f0000
 " Map cuda files to c++ so that Ycm can parse
 " autocmd BufNewFile,BufRead *.cu set filetype=cpp
+" turn off hover info
+let g:ycm_auto_hover = ''
+" toggle hover info with <F5>
+map <F5> <plug>(YCMHover)
+"
+" ---- Cpp Highlight ----
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+let g:cpp_posix_standard = 1
+let g:cpp_concepts_highlight = 1
 
 " ---- LeaderF ----
 let g:Lf_WindowPosition = 'popup'
+" searching at file level
+map <F2> :Leaderf file<CR>
+"  searching at line level
+map <F3> :Leaderf line<CR>
+
+" ---- Fern -----
+"let g:fern#renderer = "nerdfont"
+"map <F2> :Fern . -drawer<CR>
+"map <F3> :Fern . -drawer -toggle -stay<CR>
+
+"function! s:init_fern() abort
+  " Use 'select' instead of 'edit' for default 'open' action
+  "nmap <buffer> <Plug>(fern-action-open) <Plug>(fern-action-open:select)
+
+  " Define NERDTree like mappings
+  "nmap <buffer> o <Plug>(fern-action-open:edit)
+  "nmap <buffer> go <Plug>(fern-action-open:edit)<C-w>p
+  "nmap <buffer> t <Plug>(fern-action-open:tabedit)
+  "nmap <buffer> T <Plug>(fern-action-open:tabedit)gT
+  "nmap <buffer> i <Plug>(fern-action-open:split)
+  "nmap <buffer> gi <Plug>(fern-action-open:split)<C-w>p
+  "nmap <buffer> s <Plug>(fern-action-open:vsplit)
+  "nmap <buffer> gs <Plug>(fern-action-open:vsplit)<C-w>p
+  "nmap <buffer> ma <Plug>(fern-action-new-path)
+  "nmap <buffer> P gg
+
+  "nmap <buffer> C <Plug>(fern-action-enter)
+  "nmap <buffer> u <Plug>(fern-action-leave)
+  "nmap <buffer> r <Plug>(fern-action-reload)
+  "nmap <buffer> R gg<Plug>(fern-action-reload)<C-o>
+  "nmap <buffer> cd <Plug>(fern-action-cd)
+  "nmap <buffer> CD gg<Plug>(fern-action-cd)<C-o>
+
+  "nmap <buffer> ii <Plug>(fern-action-hidden-toggle)
+
+  "nmap <buffer> q :<C-u>quit<CR>
+"endfunction
+
+"augroup fern-custom
+  "autocmd! *
+  "autocmd FileType fern call s:init_fern()
+"augroup END
+
+" tab control
+nnoremap <C-Left> :tabprevious<CR>
+nnoremap <C-Right> :tabnext<CR>
 
 " ---- Markdown ----
 let g:instant_markdown_autostart = 0
@@ -100,13 +165,16 @@ set termencoding=utf-8
 " use indetation of previous line
 set autoindent
 " use intelligent indentation for C
-set smartindent
+"set smartindent
 
-" configure tabwidth and insert spaces instead of tabs
+filetype plugin indent on
+" On pressing tab, insert 2 spaces
+set expandtab
+" show existing tab with 2 spaces width
 set tabstop=2
+set softtabstop=2
+" when indenting with '>', use 2 spaces width
 set shiftwidth=2
-set softtabstop=2 " Sets the number of columns for a TAB
-set expandtab " Expand TABs to spaces
 
 " wrap lines at 120 chars
 set textwidth=120
@@ -177,26 +245,28 @@ tnoremap <Esc> <C-\><C-n>
 "nnoremap <F5> :wa<CR>:vertical botright term ++kill=term<CR>
 
 " ---- NERD TREE ---
-" open/switch to nerdtree
-map <F3> :NERDTreeFocus<CR>
-" toggle nerdtree
-map <F2> :NERDTreeToggle<CR>
-" refresh nerdtree
-nnoremap <Leader>r :NERDTreeFocus<cr>R<c-w><c-p>
-" nerdtree search
-nnoremap <C-f> :NERDTreeFind<CR>
+"" open/switch to nerdtree
+"map <F3> :NERDTreeFocus<CR>
+"" toggle nerdtree
+"map <F2> :NERDTreeToggle<CR>
+"" refresh nerdtree
+"nnoremap <Leader>r :NERDTreeFocus<cr>R<c-w><c-p>
+"" nerdtree search
+"nnoremap <C-f> :NERDTreeFind<CR>
 
-" Start NERDTree and put the cursor back in the other window.
-autocmd VimEnter * NERDTree | wincmd p
+"" Start NERDTree and put the cursor back in the other window.
+"autocmd VimEnter * NERDTree | wincmd p
 
-" Exit Vim if NERDTree is the only window remaining in the only tab.
-autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+"" Exit Vim if NERDTree is the only window remaining in the only tab.
+"autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 
-" If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
-autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
-    \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
+"" If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
+"autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
+    "\ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
 
 set ma 
+" make NERDTree open a file where the cursor was last
+set hidden
 
 " ---- auto matching brackets ----
 inoremap { {}<Esc>ha
@@ -216,9 +286,18 @@ inoremap ' ''<Esc>ha
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
 
-" ---- shift+arrow selection ----
+" ---- shift+arrow selection ---- NOTE: this is not working in tmux
 set keymodel=startsel,stopsel
 
 " ---- endline in normal mode ----
 nmap <Enter> O<Esc>j
 "nnoremap <Enter> j<Enter><Esc>k
+
+" ---- Grepper -----
+nnoremap <leader>g :Grepper -tool git<cr>
+
+" ---- Vim Section Management ----
+let g:session_directory = "~/.vim/session"
+let g:session_autoload = "no"
+let g:session_autosave = "yes"
+let g:session_command_aliases = 1

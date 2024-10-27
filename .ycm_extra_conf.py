@@ -64,7 +64,7 @@ flags = [
 # For a C project, you would set this to 'c' instead of 'c++'.
 '-isystem', '/usr/include/c++/11',
 '-isystem', '/usr/include/x86_64-linux-gnu/c++/11',
-'-std=c++2a',
+'-std=c++2b',
 '-isystem', 'cpp/absl',
 '-isystem', 'cpp/pybind11',
 '-isystem', 'cpp/whereami',
@@ -89,7 +89,7 @@ flags = [
 #
 # Most projects will NOT need to set this to anything; you can just change the
 # 'flags' list of compilation flags. Notice that YCM itself uses that approach.
-compilation_database_folder = 'compile_commands.json'
+compilation_database_folder = ''
 
 cpp_flags = ['-x', 'c++',]
 # http://llvm.org/docs/CompileCudaWithLLVM.html
