@@ -32,6 +32,9 @@ Plugin 'xolox/vim-misc'
 Plugin 'xolox/vim-session'
 Plugin 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plugin 'octol/vim-cpp-enhanced-highlight'
+Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'RRethy/vim-illuminate'
+Plugin 'brooth/far.vim'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -101,6 +104,10 @@ let g:Lf_WindowPosition = 'popup'
 map <F2> :Leaderf file<CR>
 "  searching at line level
 map <F3> :Leaderf line<CR>
+" searching at dir level
+map <F4> :Leaderf rg<CR>
+let g:Lf_DefaultExternalTool = "rg"
+let g:Lf_UseVersionControlTool = 0
 
 " ---- Fern -----
 "let g:fern#renderer = "nerdfont"
@@ -233,12 +240,17 @@ nnoremap 2 $
 vnoremap 1 ^
 vnoremap 2 $
 
-" switch tab files
-map <C-Right> :tabn <CR>
-map <C-Left> :tabp <CR>
+" Airline
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#fnamemod = ':t'
+
+" switch buffers
+map <C-Right> :bnext <CR>
+map <C-Left> :bprevious <CR>
+map <C-D> :bdelete<CR>
 
 " switch between header/source with F4
-map <F4> :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+map <F5> :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
 
 " map Esc in terminal mode to return to Normal mode
 tnoremap <Esc> <C-\><C-n>
@@ -301,3 +313,15 @@ let g:session_directory = "~/.vim/session"
 let g:session_autoload = "no"
 let g:session_autosave = "yes"
 let g:session_command_aliases = 1
+
+" ---- Indent visualization ----
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_guide_size = 1
+let g:indent_guides_start_level = 2
+
+augroup illuminate_augroup
+  autocmd!
+  autocmd VimEnter * hi illuminatedWord cterm=underline gui=underline
+augroup END
+
+set autochdir
