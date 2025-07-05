@@ -32,9 +32,16 @@ Plugin 'xolox/vim-misc'
 Plugin 'xolox/vim-session'
 Plugin 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plugin 'octol/vim-cpp-enhanced-highlight'
-Plugin 'nathanaelkane/vim-indent-guides'
+"Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'Yggdroot/indentLine'
 Plugin 'RRethy/vim-illuminate'
 Plugin 'brooth/far.vim'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'psliwka/vim-smoothie'
+Plugin 'preservim/tagbar'
+" ######### FOR PYTHON #########
+Plugin 'vim-scripts/indentpython.vim'
+Plugin 'dense-analysis/ale'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -90,7 +97,7 @@ let g:ycm_clangd_args = ['-pretty', '--query-driver=**']
 let g:ycm_auto_hover = ''
 " toggle hover info with <F5>
 map <F5> <plug>(YCMHover)
-"
+
 " ---- Cpp Highlight ----
 let g:cpp_class_scope_highlight = 1
 let g:cpp_member_variable_highlight = 1
@@ -101,13 +108,18 @@ let g:cpp_concepts_highlight = 1
 " ---- LeaderF ----
 let g:Lf_WindowPosition = 'popup'
 " searching at file level
-map <F2> :Leaderf file<CR>
+map <F2> :Leaderf file --no-ignore <CR>
 "  searching at line level
 map <F3> :Leaderf line<CR>
 " searching at dir level
 map <F4> :Leaderf rg<CR>
 let g:Lf_DefaultExternalTool = "rg"
 let g:Lf_UseVersionControlTool = 0
+let g:Lf_ShowHidden = 1
+let g:Lf_WildIgnore = {
+            \ 'dir': ["bazel-*", ".git/", "__pycache__", ".venv", ".ruff_cache", "*.tar.gz", ".lz4", ".whl"],
+            \ 'file': []
+            \}
 
 " ---- Fern -----
 "let g:fern#renderer = "nerdfont"
@@ -170,18 +182,20 @@ set fenc=utf-8
 set termencoding=utf-8
 
 " use indetation of previous line
-set autoindent
+"set autoindent
 " use intelligent indentation for C
 "set smartindent
 
-filetype plugin indent on
 " On pressing tab, insert 2 spaces
 set expandtab
 " show existing tab with 2 spaces width
 set tabstop=2
-set softtabstop=2
-" when indenting with '>', use 2 spaces width
 set shiftwidth=2
+"set softtabstop=2
+au FileType python setlocal tabstop=4 shiftwidth=4
+au FileType bazel setlocal tabstop=4 shiftwidth=4
+au FileType bzl setlocal tabstop=4 shiftwidth=4
+" when indenting with '>', use 2 spaces width
 
 " wrap lines at 120 chars
 set textwidth=120
@@ -191,6 +205,18 @@ set clipboard=unnamed,unnamedplus
 
 " prevent generating swap files
 set noswapfile
+
+" backspace settings
+set backspace=eol,start,indent
+set whichwrap+=<,>,h,l
+
+set lazyredraw
+
+" Linebreak on 500 characters
+set lbr
+set tw=500
+
+set updatetime=300
 
 " ---- ColorScheme ----
 syntax on
@@ -249,8 +275,12 @@ map <C-Right> :bnext <CR>
 map <C-Left> :bprevious <CR>
 map <C-D> :bdelete<CR>
 
+" delete operations
+nnoremap d1 d0 
+nnoremap d2 d$
+
 " switch between header/source with F4
-map <F5> :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+map <F5> :e %:p:s,.h$,.X123X,:s,src/.cpp$,.h,:s,.X123X$,src/.cpp,<CR>
 
 " map Esc in terminal mode to return to Normal mode
 tnoremap <Esc> <C-\><C-n>
@@ -287,7 +317,7 @@ inoremap [ []<Esc>ha
 inoremap " ""<Esc>ha
 inoremap ' ''<Esc>ha
 
-" ---- make cursor thin -----
+" ---- make cursor thin ----
 " Ps = 0  -> blinking block.
 " Ps = 1  -> blinking block (default).
 " Ps = 2  -> steady block.
@@ -315,13 +345,40 @@ let g:session_autosave = "yes"
 let g:session_command_aliases = 1
 
 " ---- Indent visualization ----
-let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_guide_size = 1
-let g:indent_guides_start_level = 2
+let g:markdown_syntax_conceal=0
+" used to toogle indent lines before copying
+map <C-i> :IndentLinesToggle <CR>
+"let g:indent_guides_enable_on_vim_startup = 1
+"let g:indent_guides_guide_size = 1
+"let g:indent_guides_start_level = 2
+"hi IndentGuidesOdd  ctermbg=236
+"hi IndentGuidesEven  ctermbg=237
 
 augroup illuminate_augroup
   autocmd!
   autocmd VimEnter * hi illuminatedWord cterm=underline gui=underline
 augroup END
 
-set autochdir
+" ---- vim-gitgutter ----
+let g:gitgutter_set_sign_backgrounds = 1
+highlight SignColumn guibg=black ctermbg=1
+
+" ---- vim-smoothie ----
+let g:smoothie_no_default_mappings = 1
+nnoremap <unique> <C-Down> <cmd>call smoothie#do("\<C-D>") <CR>
+vnoremap <unique> <C-Down> <cmd>call smoothie#do("\<C-D>") <CR>
+nnoremap <unique> <C-Up> <cmd>call smoothie#do("\<C-U>") <CR>
+vnoremap <unique> <C-Up> <cmd>call smoothie#do("\<C-U>") <CR>
+
+" ---- AutoReload when switching ----
+au FocusLost,WinLeave * :silent! noautocmd w
+
+" ---- Tagbar ----
+nmap <F8> :TagbarToggle<CR>
+
+" ---- Yaml ----
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
+
+"---- Spell checking ---
+"map <leader>ss :setlocal spell!<cr> 
